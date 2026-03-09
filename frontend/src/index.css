@@ -16,9 +16,11 @@
 }
 
 @layer base {
-  body {
+  html, body {
     @apply antialiased text-gray-800 bg-gray-50;
     font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    width: 100%;
   }
 }
 

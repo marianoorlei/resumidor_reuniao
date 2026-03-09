@@ -123,7 +123,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="p-4 md:p-10 max-w-5xl">
+        <div className="p-4 md:p-10 max-w-5xl w-full overflow-hidden">
             {toast && (
                 <Toast
                     message={toast.message}

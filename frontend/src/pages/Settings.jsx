@@ -65,7 +65,7 @@ export default function Settings() {
     if (loading) return <div className="p-10">Carregando...</div>;
 
     return (
-        <div className="p-4 md:p-10 max-w-4xl">
+        <div className="p-4 md:p-10 max-w-4xl w-full overflow-hidden">
             {toast && (
                 <Toast
                     message={toast.message}

@@ -21,7 +21,7 @@ export default function Layout() {
     const closeSidebar = () => setSidebarOpen(false);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-50 flex overflow-x-hidden w-full">
             {/* Mobile Top Bar */}
             <div className="md:hidden fixed top-0 left-0 right-0 bg-gray-50 border-b border-gray-200 flex items-center px-4 py-3 z-30 shadow-sm">
                 <button
@@ -97,7 +97,7 @@ export default function Layout() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 md:ml-64 bg-white min-h-screen pt-14 md:pt-0">
+            <div className="flex-1 md:ml-64 bg-white min-h-screen pt-14 md:pt-0 w-full min-w-0 overflow-x-hidden">
                 <Outlet />
             </div>
         </div>
