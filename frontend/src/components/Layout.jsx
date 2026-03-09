@@ -13,8 +13,8 @@ export default function Layout() {
     };
 
     const navItems = [
-        { name: 'My Meetings', icon: Calendar, path: '/dashboard' },
-        { name: 'Settings', icon: SettingsIcon, path: '/configuracoes' },
+        { name: 'Minhas Reuniões', icon: Calendar, path: '/dashboard' },
+        { name: 'Configurações', icon: SettingsIcon, path: '/configuracoes' },
     ];
 
     return (
@@ -50,7 +50,7 @@ export default function Layout() {
                         className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors w-full"
                     >
                         <LogOut className="w-5 h-5" />
-                        <span>Logout</span>
+                        <span>Sair</span>
                     </button>
                 </div>
             </div>

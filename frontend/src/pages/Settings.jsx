@@ -60,25 +60,25 @@ export default function Settings() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    if (loading) return <div className="p-10">Loading...</div>;
+    if (loading) return <div className="p-10">Carregando...</div>;
 
     return (
         <div className="p-10 max-w-4xl">
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Settings</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Configurações</h1>
 
             <form onSubmit={handleSave}>
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                     <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center">
                             <KeyRound className="w-5 h-5 mr-2 text-blue-600" />
-                            OpenAI Integration
+                            Integração OpenAI
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">Configure sua chave de API para habilitar a análise de inteligência artificial.</p>
                     </div>
 
                     <div className="p-6">
                         <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-900 mb-2">OpenAI API Key</label>
+                            <label className="block text-sm font-medium text-gray-900 mb-2">Chave de API OpenAI</label>
                             <input
                                 type="password"
                                 value={openAiKey}
@@ -95,14 +95,14 @@ export default function Settings() {
                     <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center">
                             <Flame className="w-5 h-5 mr-2 text-orange-500" />
-                            Fireflies Integration
+                            Integração Fireflies
                         </h2>
                         <p className="text-sm text-gray-500 mt-1">Configure sua chave de API do Fireflies.ai para buscar transcrições de reuniões.</p>
                     </div>
 
                     <div className="p-6">
                         <div className="mb-2">
-                            <label className="block text-sm font-medium text-gray-900 mb-2">Fireflies API Key</label>
+                            <label className="block text-sm font-medium text-gray-900 mb-2">Chave de API Fireflies</label>
                             <input
                                 type="password"
                                 value={firefliesKey}
