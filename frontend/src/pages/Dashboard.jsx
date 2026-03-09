@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2 } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 
@@ -76,6 +76,22 @@ export default function Dashboard() {
         }
 
         setProcessing(false);
+    }
+
+    async function handleDelete(e, meetingId) {
+        e.stopPropagation();
+        if (!confirm('Tem certeza que deseja excluir esta reunião?')) return;
+
+        const { error } = await supabase
+            .from('meetings')
+            .delete()
+            .eq('id', meetingId);
+
+        if (!error) {
+            setMeetings(prev => prev.filter(m => m.id !== meetingId));
+        } else {
+            alert('Erro ao excluir: ' + error.message);
+        }
     }
 
     const getBadgeColor = (type) => {
@@ -174,6 +190,13 @@ export default function Dashboard() {
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <h3 className="text-lg font-bold text-gray-900">{m.title}</h3>
+                                    <button
+                                        onClick={(e) => handleDelete(e, m.id)}
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                        title="Excluir reunião"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
 
                                 <div className="flex items-center text-sm text-gray-500 mb-3 space-x-2">
