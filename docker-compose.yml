@@ -5,6 +5,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_API_URL: ${VITE_API_URL}
     ports:
       - "80:80"
     restart: unless-stopped
@@ -21,3 +25,6 @@ services:
     environment:
       - PORT=3000
       - NODE_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - FIREFLIES_API_KEY=${FIREFLIES_API_KEY}

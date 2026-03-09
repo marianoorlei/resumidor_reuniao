@@ -11,10 +11,9 @@ export default function Settings() {
     const [saving, setSaving] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // URL base onde o SaaS vai rodar para gerar o link do Webhook
-    const webhookBaseUrl = window.location.origin.includes('localhost')
-        ? 'http://localhost:3000/api/webhooks/fireflies/'
-        : 'https://api.SEUDOMINIO.com/api/webhooks/fireflies/';
+    // URL base do backend para gerar o link do Webhook
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const webhookBaseUrl = `${backendUrl}/api/webhooks/fireflies/`;
 
     useEffect(() => {
         async function loadProfile() {
