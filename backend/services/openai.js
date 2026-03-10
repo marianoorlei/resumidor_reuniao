@@ -27,7 +27,7 @@ async function analyzeTranscript(transcriptText, openAiKey) {
         const response = await openai.responses.create({
             model: 'gpt-5-mini',
             instructions: systemPrompt,
-            input: `Aqui está a transcrição completa:\n\n${transcriptText}`,
+            input: `Analise a transcrição abaixo e retorne o resultado em formato json.\n\nAqui está a transcrição completa:\n\n${transcriptText}`,
             text: {
                 format: {
                     type: 'json_object'
