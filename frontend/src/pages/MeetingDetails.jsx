@@ -142,7 +142,7 @@ export default function MeetingDetails() {
             }
         }
 
-        function addSection(title, emoji, content) {
+        function addSection(title, content) {
             if (!content) return;
             checkPageBreak(30);
 
@@ -152,7 +152,7 @@ export default function MeetingDetails() {
             doc.setTextColor(...darkBlue);
             doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
-            doc.text(`${emoji}  ${title}`, margin + 6, y + 6);
+            doc.text(title, margin + 6, y + 6);
             y += 12;
 
             // Conteúdo
@@ -169,10 +169,10 @@ export default function MeetingDetails() {
         }
 
         // Objetivo
-        addSection('Objetivo da Reunião', '🎯', meeting.objective);
+        addSection('Objetivo da Reunião', meeting.objective);
 
         // Resumo Executivo
-        addSection('Resumo Executivo', '📝', meeting.executive_summary);
+        addSection('Resumo Executivo', meeting.executive_summary);
 
         // Decisões-Chave
         if (meeting.decisions) {
@@ -182,7 +182,7 @@ export default function MeetingDetails() {
             doc.setTextColor(...darkBlue);
             doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
-            doc.text('✅  Decisões-Chave', margin + 6, y + 6);
+            doc.text('Decisoes-Chave', margin + 6, y + 6);
             y += 14;
 
             const decisions = meeting.decisions.split('\n').filter(Boolean);
@@ -213,7 +213,7 @@ export default function MeetingDetails() {
             doc.setTextColor(...darkBlue);
             doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
-            doc.text('📊  Aproveitamento da Reunião', margin + 6, y + 6);
+            doc.text('Aproveitamento da Reuniao', margin + 6, y + 6);
             y += 14;
 
             // Barra de progresso
@@ -254,7 +254,7 @@ export default function MeetingDetails() {
             doc.setTextColor(...darkBlue);
             doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
-            doc.text('📌  Itens de Ação', margin + 6, y + 6);
+            doc.text('Itens de Acao', margin + 6, y + 6);
             y += 14;
 
             meeting.action_items.forEach((item, idx) => {
