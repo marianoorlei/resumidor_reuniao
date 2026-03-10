@@ -13,7 +13,8 @@ async function analyzeTranscript(transcriptText, openAiKey) {
 
   Retorne APENAS o JSON, sem markdown ou texto em volta:
   {
-    "tipo_reuniao": "string", // Ex: Vendas, Equipe, Start de Projeto, Feedback
+    "titulo": "string", // Um título curto, claro e descritivo para a reunião (máximo 60 caracteres). Ex: "Alinhamento Sprint 12 - Time de Produto", "Reunião Comercial - Proposta Cliente XYZ"
+    "tipo_reuniao": "string", // SEMPRE em português. Valores possíveis: "Equipe", "Vendas", "Projeto", "Alinhamento", "Feedback", "Entrevista", "Planejamento", "Retrospectiva", "Daily", "Brainstorm", "Treinamento", "1:1", "Apresentação", "Análise"
     "objetivo": "string", // O objetivo principal desta reunião
     "resumo_executivo": "string", // Um resumo conciso da reunião (2 a 3 parágrafos)
     "decisoes": "string", // Tópicos e decisões importantes tomadas (formato Markdown bullet points)

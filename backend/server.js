@@ -107,7 +107,7 @@ async function processMeeting(firefliesId, userId, openAiKey, firefliesApiKey) {
     await supabase.rpc('process_webhook_meeting', {
       p_user_id: userId,
       p_fireflies_id: firefliesId,
-      p_title: transcriptData.title || 'Reunião Importada',
+      p_title: analysis.titulo || transcriptData.title || 'Reunião Importada',
       p_date: transcriptData.date ? new Date(transcriptData.date).toISOString() : new Date().toISOString(),
       p_duration: transcriptData.duration || 0,
       p_meeting_type: analysis.tipo_reuniao,

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2, Trash2, RefreshCw } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2, Trash2, RefreshCw, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import Toast from '../components/Toast';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -19,11 +20,61 @@ export default function Dashboard() {
     const [reprocessing, setReprocessing] = useState(null);
     const navigate = useNavigate();
 
+    // Filtros
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateFilter, setDateFilter] = useState('');
+    const [typeFilter, setTypeFilter] = useState('');
+    const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+
     const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     useEffect(() => {
         fetchMeetings();
     }, []);
+
+    // Extrair tipos únicos das reuniões
+    const meetingTypes = useMemo(() => {
+        const types = meetings
+            .map(m => m.meeting_type)
+            .filter(Boolean)
+            .filter((v, i, a) => a.indexOf(v) === i)
+            .sort();
+        return types;
+    }, [meetings]);
+
+    // Filtrar reuniões
+    const filteredMeetings = useMemo(() => {
+        return meetings.filter(m => {
+            // Filtro de busca por título
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                const matchTitle = m.title?.toLowerCase().includes(term);
+                const matchSummary = m.executive_summary?.toLowerCase().includes(term);
+                if (!matchTitle && !matchSummary) return false;
+            }
+
+            // Filtro por data
+            if (dateFilter && m.date) {
+                const meetingDate = format(parseISO(m.date), 'yyyy-MM-dd');
+                if (meetingDate !== dateFilter) return false;
+            }
+
+            // Filtro por tipo
+            if (typeFilter) {
+                if (m.meeting_type !== typeFilter) return false;
+            }
+
+            return true;
+        });
+    }, [meetings, searchTerm, dateFilter, typeFilter]);
+
+    const hasActiveFilters = searchTerm || dateFilter || typeFilter;
+
+    function clearFilters() {
+        setSearchTerm('');
+        setDateFilter('');
+        setTypeFilter('');
+    }
 
     async function fetchMeetings() {
         const { data, error } = await supabase
@@ -148,23 +199,31 @@ export default function Dashboard() {
         setReprocessing(null);
     }
 
+    const badgeColors = [
+        'bg-blue-500 text-white',
+        'bg-teal-500 text-white',
+        'bg-purple-500 text-white',
+        'bg-orange-500 text-white',
+        'bg-pink-500 text-white',
+        'bg-indigo-500 text-white',
+        'bg-emerald-500 text-white',
+        'bg-amber-500 text-white',
+        'bg-cyan-500 text-white',
+        'bg-rose-500 text-white',
+        'bg-violet-500 text-white',
+        'bg-lime-600 text-white',
+        'bg-sky-500 text-white',
+        'bg-fuchsia-500 text-white',
+    ];
+
     const getBadgeColor = (type) => {
-        switch (type?.toLowerCase()) {
-            case 'sales meeting':
-            case 'vendas':
-                return 'bg-blue-500 text-white';
-            case 'team sync':
-            case 'equipe':
-                return 'bg-teal-500 text-white';
-            case 'project kickoff':
-            case 'projeto':
-                return 'bg-purple-500 text-white';
-            case 'one-on-one':
-            case '1on1':
-                return 'bg-orange-500 text-white';
-            default:
-                return 'bg-gray-500 text-white';
+        if (!type) return 'bg-gray-400 text-white';
+        // Gera um índice consistente baseado no texto do tipo
+        let hash = 0;
+        for (let i = 0; i < type.length; i++) {
+            hash = type.charCodeAt(i) + ((hash << 5) - hash);
         }
+        return badgeColors[Math.abs(hash) % badgeColors.length];
     };
 
     return (
@@ -200,22 +259,110 @@ export default function Dashboard() {
                         </div>
                         <input
                             type="text"
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out"
                             placeholder="Pesquisar reuniões..."
                         />
+                        {searchTerm && (
+                            <button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600">
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <CalendarIcon className="mr-2 h-4 w-4" /> Data
-                        </button>
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={dateFilter}
+                                onChange={(e) => setDateFilter(e.target.value)}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                            />
+                            <button className={`flex items-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${dateFilter ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dateFilter ? format(parseISO(dateFilter), "d MMM yyyy", { locale: ptBR }) : 'Data'}
+                                {dateFilter && (
+                                    <span
+                                        onClick={(e) => { e.stopPropagation(); setDateFilter(''); }}
+                                        className="ml-2 hover:text-blue-900 cursor-pointer"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </span>
+                                )}
+                            </button>
+                        </div>
 
-                        <button className="flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Tipo de Reunião <ChevronDown className="ml-2 h-4 w-4" />
-                        </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                                className={`flex items-center px-4 py-2 border shadow-sm text-sm font-medium rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${typeFilter ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
+                            >
+                                {typeFilter || 'Tipo de Reunião'}
+                                {typeFilter ? (
+                                    <span
+                                        onClick={(e) => { e.stopPropagation(); setTypeFilter(''); setShowTypeDropdown(false); }}
+                                        className="ml-2 hover:text-blue-900 cursor-pointer"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </span>
+                                ) : (
+                                    <ChevronDown className="ml-2 h-4 w-4" />
+                                )}
+                            </button>
+
+                            {showTypeDropdown && (
+                                <>
+                                    <div className="fixed inset-0 z-10" onClick={() => setShowTypeDropdown(false)} />
+                                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                                        {meetingTypes.length === 0 ? (
+                                            <p className="px-4 py-2 text-sm text-gray-400">Nenhum tipo encontrado</p>
+                                        ) : (
+                                            meetingTypes.map(type => (
+                                                <button
+                                                    key={type}
+                                                    onClick={() => { setTypeFilter(type); setShowTypeDropdown(false); }}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition ${typeFilter === type ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* Filtros ativos */}
+            {hasActiveFilters && (
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                    <span className="text-sm text-gray-500">Filtros:</span>
+                    {searchTerm && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            Busca: "{searchTerm}"
+                            <button onClick={() => setSearchTerm('')}><X className="h-3 w-3" /></button>
+                        </span>
+                    )}
+                    {dateFilter && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            Data: {format(parseISO(dateFilter), "d MMM yyyy", { locale: ptBR })}
+                            <button onClick={() => setDateFilter('')}><X className="h-3 w-3" /></button>
+                        </span>
+                    )}
+                    {typeFilter && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                            Tipo: {typeFilter}
+                            <button onClick={() => setTypeFilter('')}><X className="h-3 w-3" /></button>
+                        </span>
+                    )}
+                    <button onClick={clearFilters} className="text-xs text-gray-500 hover:text-gray-700 underline ml-1">
+                        Limpar todos
+                    </button>
+                </div>
+            )}
 
             {/* Processar reunião manualmente */}
             <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm mb-6">
@@ -252,12 +399,14 @@ export default function Dashboard() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {meetings.length === 0 ? (
+                    {filteredMeetings.length === 0 ? (
                         <div className="text-center py-20 text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
-                            Nenhuma reunião encontrada. Configure seu Webhook no app Fireflies.
+                            {hasActiveFilters
+                                ? 'Nenhuma reunião encontrada com os filtros aplicados.'
+                                : 'Nenhuma reunião encontrada. Configure seu Webhook no app Fireflies.'}
                         </div>
                     ) : (
-                        meetings.map((m) => (
+                        filteredMeetings.map((m) => (
                             <div
                                 key={m.id}
                                 className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow transition-shadow cursor-pointer"
@@ -287,7 +436,7 @@ export default function Dashboard() {
                                 <div className="flex items-center text-sm text-gray-500 mb-3 space-x-2">
                                     <Clock className="w-4 h-4" />
                                     <span>
-                                        {m.date ? format(parseISO(m.date), 'MMM d, yyyy') : 'Sem data'} • {m.duration ? `${m.duration}m` : '0m'}
+                                        {m.date ? format(parseISO(m.date), "d 'de' MMM, yyyy", { locale: ptBR }) : 'Sem data'} • {m.duration ? `${m.duration}m` : '0m'}
                                     </span>
                                 </div>
 
@@ -295,6 +444,14 @@ export default function Dashboard() {
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${getBadgeColor(m.meeting_type)}`}>
                                         {m.meeting_type || 'Geral'}
                                     </span>
+                                    {m.productivity_score != null && (
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ml-2 ${
+                                            m.productivity_score >= 7 ? 'bg-green-100 text-green-700' :
+                                            m.productivity_score >= 4 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {m.productivity_score}/10
+                                        </span>
+                                    )}
                                 </div>
 
                                 <p className="text-gray-700 text-sm truncate">
