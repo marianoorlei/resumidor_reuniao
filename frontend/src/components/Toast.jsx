@@ -13,14 +13,14 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
 
     const styles = {
         success: {
-            bg: 'bg-green-50 border-green-200',
-            text: 'text-green-800',
-            icon: <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />,
+            bg: 'bg-green-500/10 border-green-500/30',
+            text: 'text-green-400',
+            icon: <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />,
         },
         error: {
-            bg: 'bg-red-50 border-red-200',
-            text: 'text-red-800',
-            icon: <XCircle className="w-5 h-5 text-red-500 shrink-0" />,
+            bg: 'bg-red-500/10 border-red-500/30',
+            text: 'text-red-400',
+            icon: <XCircle className="w-5 h-5 text-red-400 shrink-0" />,
         },
     };
 
@@ -28,11 +28,11 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
 
     return (
         <div className="fixed top-4 right-4 z-[100] animate-slide-in">
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg ${s.bg} max-w-sm`}>
+            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-sm ${s.bg} max-w-sm`}>
                 {s.icon}
                 <p className={`text-sm font-medium ${s.text}`}>{message}</p>
-                <button onClick={onClose} className="ml-auto p-0.5 rounded hover:bg-black/5 transition">
-                    <X className="w-4 h-4 text-gray-400" />
+                <button onClick={onClose} className="ml-auto p-0.5 rounded hover:bg-white/5 transition">
+                    <X className="w-4 h-4 text-gray-500" />
                 </button>
             </div>
         </div>

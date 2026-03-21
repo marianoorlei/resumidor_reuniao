@@ -21,25 +21,25 @@ export default function Layout() {
     const closeSidebar = () => setSidebarOpen(false);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex overflow-x-hidden w-full">
+        <div className="min-h-screen bg-[#0f1117] flex overflow-x-hidden w-full">
             {/* Mobile Top Bar */}
-            <div className="md:hidden fixed top-0 left-0 right-0 bg-gray-50 border-b border-gray-200 flex items-center px-4 py-3 z-30 shadow-sm">
+            <div className="md:hidden fixed top-0 left-0 right-0 bg-[#141620] border-b border-gray-700/50 flex items-center px-4 py-3 z-30 shadow-sm">
                 <button
                     onClick={() => setSidebarOpen(true)}
-                    className="p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="p-1.5 rounded-lg text-gray-300 hover:bg-gray-700/50 transition-colors"
                 >
                     <Menu className="w-6 h-6" />
                 </button>
                 <div className="flex items-center space-x-2 ml-3">
-                    <Brain className="w-7 h-7 text-gray-900" />
-                    <span className="text-lg font-bold text-gray-900">AI Meet</span>
+                    <Brain className="w-7 h-7 text-blue-400" />
+                    <span className="text-lg font-bold text-gray-100">AI Meet</span>
                 </div>
             </div>
 
             {/* Mobile Backdrop */}
             {sidebarOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/40 z-40"
+                    className="md:hidden fixed inset-0 bg-black/60 z-40"
                     onClick={closeSidebar}
                 />
             )}
@@ -47,7 +47,7 @@ export default function Layout() {
             {/* Sidebar */}
             <div
                 className={`
-                    fixed inset-y-0 left-0 w-64 bg-gray-50 border-r border-gray-200 flex flex-col shadow-sm z-50
+                    fixed inset-y-0 left-0 w-64 bg-[#141620] border-r border-gray-700/50 flex flex-col shadow-sm z-50
                     transition-transform duration-300 ease-in-out
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     md:translate-x-0
@@ -55,12 +55,12 @@ export default function Layout() {
             >
                 <div className="flex items-center justify-between px-6 py-6">
                     <div className="flex items-center space-x-2">
-                        <Brain className="w-8 h-8 text-gray-900" />
-                        <span className="text-xl font-bold text-gray-900">AI Meet</span>
+                        <Brain className="w-8 h-8 text-blue-400" />
+                        <span className="text-xl font-bold text-gray-100">AI Meet</span>
                     </div>
                     <button
                         onClick={closeSidebar}
-                        className="md:hidden p-1 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="md:hidden p-1 rounded-lg text-gray-400 hover:bg-gray-700/50 transition-colors"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -74,8 +74,8 @@ export default function Layout() {
                             onClick={closeSidebar}
                             className={({ isActive }) =>
                                 `flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
-                                    ? 'bg-blue-100/50 text-blue-700'
-                                    : 'text-gray-700 hover:bg-gray-100'
+                                    ? 'bg-blue-500/15 text-blue-400'
+                                    : 'text-gray-400 hover:bg-gray-700/40 hover:text-gray-200'
                                 }`
                             }
                         >
@@ -88,7 +88,7 @@ export default function Layout() {
                 <div className="p-4 mb-4">
                     <button
                         onClick={() => { closeSidebar(); handleLogout(); }}
-                        className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors w-full"
+                        className="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-700/40 hover:text-gray-200 transition-colors w-full"
                     >
                         <LogOut className="w-5 h-5" />
                         <span>Sair</span>
@@ -97,7 +97,7 @@ export default function Layout() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 md:ml-64 bg-white min-h-screen pt-14 md:pt-0 w-full min-w-0 overflow-x-hidden">
+            <div className="flex-1 md:ml-64 bg-[#0f1117] min-h-screen pt-14 md:pt-0 w-full min-w-0 overflow-x-hidden">
                 <Outlet />
             </div>
         </div>

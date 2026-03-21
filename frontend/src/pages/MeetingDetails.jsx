@@ -146,7 +146,6 @@ export default function MeetingDetails() {
             if (!content) return;
             checkPageBreak(30);
 
-            // Linha azul lateral + título
             doc.setFillColor(...blue);
             doc.rect(margin, y, 3, 8, 'F');
             doc.setTextColor(...darkBlue);
@@ -155,7 +154,6 @@ export default function MeetingDetails() {
             doc.text(title, margin + 6, y + 6);
             y += 12;
 
-            // Conteúdo
             doc.setTextColor(55, 65, 81);
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
@@ -168,13 +166,9 @@ export default function MeetingDetails() {
             y += 6;
         }
 
-        // Objetivo
         addSection('Objetivo da Reunião', meeting.objective);
-
-        // Resumo Executivo
         addSection('Resumo Executivo', meeting.executive_summary);
 
-        // Decisões-Chave
         if (meeting.decisions) {
             checkPageBreak(30);
             doc.setFillColor(...blue);
@@ -205,7 +199,6 @@ export default function MeetingDetails() {
             y += 4;
         }
 
-        // Aproveitamento
         if (meeting.productivity_score != null) {
             checkPageBreak(30);
             doc.setFillColor(...blue);
@@ -216,7 +209,6 @@ export default function MeetingDetails() {
             doc.text('Aproveitamento da Reuniao', margin + 6, y + 6);
             y += 14;
 
-            // Barra de progresso
             const barWidth = 80;
             const barHeight = 6;
             doc.setFillColor(...lightGray);
@@ -246,7 +238,6 @@ export default function MeetingDetails() {
             y += 6;
         }
 
-        // Itens de Ação
         if (meeting.action_items && Array.isArray(meeting.action_items) && meeting.action_items.length > 0) {
             checkPageBreak(30);
             doc.setFillColor(...blue);
@@ -259,13 +250,9 @@ export default function MeetingDetails() {
 
             meeting.action_items.forEach((item, idx) => {
                 checkPageBreak(10);
-
-                // Checkbox
                 doc.setDrawColor(...gray);
                 doc.setLineWidth(0.3);
                 doc.rect(margin + 6, y - 3, 4, 4);
-
-                // Número + texto
                 doc.setTextColor(55, 65, 81);
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'normal');
@@ -280,7 +267,6 @@ export default function MeetingDetails() {
             y += 4;
         }
 
-        // Footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -294,26 +280,25 @@ export default function MeetingDetails() {
             doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin - 20, pageH - 5);
         }
 
-        // Salvar
         const fileName = (meeting.title || 'reuniao').replace(/[^a-zA-Z0-9À-ÿ\s-]/g, '').replace(/\s+/g, '_');
         doc.save(`${fileName}.pdf`);
         setToast({ message: 'PDF gerado com sucesso!', type: 'success' });
     }
 
     if (loading) return <div className="p-10 text-center text-gray-500">Carregando...</div>;
-    if (!meeting) return <div className="p-10 text-center text-red-500">Reunião não encontrada.</div>;
+    if (!meeting) return <div className="p-10 text-center text-red-400">Reunião não encontrada.</div>;
 
     return (
-        <div className="flex flex-col min-h-screen lg:h-screen bg-gray-50">
+        <div className="flex flex-col min-h-screen lg:h-screen bg-[#0f1117]">
             {toast && (
                 <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
             )}
 
             {/* Header */}
-            <header className="bg-[#1e293b] text-white px-4 lg:px-6 py-4 flex flex-wrap items-center justify-between shrink-0 gap-2">
+            <header className="bg-[#141620] text-white px-4 lg:px-6 py-4 flex flex-wrap items-center justify-between shrink-0 gap-2 border-b border-gray-700/50">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="flex items-center space-x-2 text-sm font-medium text-gray-300 hover:text-white bg-[#0f172a] px-3 py-1.5 rounded border border-gray-700 transition"
+                    className="flex items-center space-x-2 text-sm font-medium text-gray-400 hover:text-white bg-[#1a1d27] px-3 py-1.5 rounded border border-gray-700/50 transition"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Voltar</span>
@@ -326,7 +311,7 @@ export default function MeetingDetails() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={handleShare}
-                        className="flex items-center gap-1.5 text-sm font-medium text-gray-300 hover:text-white bg-[#0f172a] px-3 py-1.5 rounded border border-gray-700 transition"
+                        className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-white bg-[#1a1d27] px-3 py-1.5 rounded border border-gray-700/50 transition"
                         title="Compartilhar no WhatsApp"
                     >
                         <Share2 className="w-4 h-4" />
@@ -334,7 +319,7 @@ export default function MeetingDetails() {
                     </button>
                     <button
                         onClick={handleGeneratePDF}
-                        className="flex items-center gap-1.5 text-sm font-medium text-gray-300 hover:text-white bg-[#0f172a] px-3 py-1.5 rounded border border-gray-700 transition"
+                        className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-white bg-[#1a1d27] px-3 py-1.5 rounded border border-gray-700/50 transition"
                         title="Gerar PDF"
                     >
                         <FileDown className="w-4 h-4" />
@@ -342,11 +327,11 @@ export default function MeetingDetails() {
                     </button>
 
                     <div className="hidden lg:flex items-center space-x-4 text-sm font-medium ml-2">
-                        <span className="text-gray-300">
+                        <span className="text-gray-400">
                             {meeting.date ? format(parseISO(meeting.date), "d 'de' MMMM, yyyy", { locale: ptBR }) : ''}
                         </span>
                         {meeting.meeting_type && (
-                            <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-xs font-bold">
+                            <span className="bg-blue-500/15 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">
                                 {meeting.meeting_type}
                             </span>
                         )}
@@ -359,35 +344,35 @@ export default function MeetingDetails() {
 
                 {/* Left Column: AI Analysis */}
                 <div className="w-full lg:w-1/2 flex flex-col overflow-y-auto pr-0 lg:pr-2 space-y-4 pb-20">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Análise da IA</h2>
+                    <h2 className="text-2xl font-bold text-gray-100 mb-2">Análise da IA</h2>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h3 className="text-sm font-bold text-gray-900 mb-2">Objetivo da Reunião</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">{meeting.objective || 'Não disponível'}</p>
+                    <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
+                        <h3 className="text-sm font-bold text-gray-200 mb-2">Objetivo da Reunião</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed">{meeting.objective || 'Não disponível'}</p>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h3 className="text-sm font-bold text-gray-900 mb-2">Resumo Executivo</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">{meeting.executive_summary || 'Não disponível'}</p>
+                    <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
+                        <h3 className="text-sm font-bold text-gray-200 mb-2">Resumo Executivo</h3>
+                        <p className="text-gray-400 text-sm leading-relaxed whitespace-pre-line">{meeting.executive_summary || 'Não disponível'}</p>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h3 className="text-sm font-bold text-gray-900 mb-3">Decisões-Chave</h3>
+                    <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
+                        <h3 className="text-sm font-bold text-gray-200 mb-3">Decisões-Chave</h3>
                         <ul className="space-y-2">
                             {meeting.decisions ? meeting.decisions.split('\n').filter(Boolean).map((decision, idx) => (
                                 <li key={idx} className="flex items-start space-x-2">
-                                    <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                                    <span className="text-gray-700 text-sm leading-relaxed">{decision.replace(/^- /, '')}</span>
+                                    <CheckCircle2 className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                                    <span className="text-gray-400 text-sm leading-relaxed">{decision.replace(/^- /, '')}</span>
                                 </li>
-                            )) : <li className="text-gray-500 text-sm">Não disponível</li>}
+                            )) : <li className="text-gray-600 text-sm">Não disponível</li>}
                         </ul>
                     </div>
 
                     {meeting.productivity_score != null && (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                            <h3 className="text-sm font-bold text-gray-900 mb-3">Aproveitamento da Reunião</h3>
+                        <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
+                            <h3 className="text-sm font-bold text-gray-200 mb-3">Aproveitamento da Reunião</h3>
                             <div className="flex items-center gap-4 mb-3">
-                                <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div className="flex-1 bg-gray-700 rounded-full h-3 overflow-hidden">
                                     <div
                                         className={`h-full rounded-full transition-all duration-500 ${
                                             meeting.productivity_score >= 7 ? 'bg-green-500' :
@@ -397,52 +382,52 @@ export default function MeetingDetails() {
                                     />
                                 </div>
                                 <span className={`text-lg font-bold ${
-                                    meeting.productivity_score >= 7 ? 'text-green-600' :
-                                    meeting.productivity_score >= 4 ? 'text-yellow-600' : 'text-red-600'
+                                    meeting.productivity_score >= 7 ? 'text-green-400' :
+                                    meeting.productivity_score >= 4 ? 'text-yellow-400' : 'text-red-400'
                                 }`}>
                                     {meeting.productivity_score}/10
                                 </span>
                             </div>
                             {meeting.productivity_reason && (
-                                <p className="text-gray-600 text-sm leading-relaxed">{meeting.productivity_reason}</p>
+                                <p className="text-gray-500 text-sm leading-relaxed">{meeting.productivity_reason}</p>
                             )}
                         </div>
                     )}
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                        <h3 className="text-sm font-bold text-gray-900 mb-3">Itens de Ação</h3>
+                    <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
+                        <h3 className="text-sm font-bold text-gray-200 mb-3">Itens de Ação</h3>
                         <ul className="space-y-3">
                             {meeting.action_items && Array.isArray(meeting.action_items) ?
                                 meeting.action_items.map((item, idx) => (
                                     <li key={idx} className="flex items-start space-x-3">
-                                        <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                                        <span className="text-gray-700 text-sm leading-relaxed leading-snug">{item}</span>
+                                        <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-600 bg-[#252836] text-blue-500 focus:ring-blue-500 focus:ring-offset-[#1a1d27]" />
+                                        <span className="text-gray-400 text-sm leading-relaxed leading-snug">{item}</span>
                                     </li>
-                                )) : <p className="text-gray-500 text-sm">Não disponível</p>}
+                                )) : <p className="text-gray-600 text-sm">Não disponível</p>}
                         </ul>
                     </div>
                 </div>
 
                 {/* Right Column: Full Transcript */}
-                <div className="w-full lg:w-1/2 flex flex-col h-[500px] lg:h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-                        <h2 className="text-xl font-bold text-gray-900">Transcrição Completa</h2>
+                <div className="w-full lg:w-1/2 flex flex-col h-[500px] lg:h-full bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-700/50 bg-[#141620]">
+                        <h2 className="text-xl font-bold text-gray-100">Transcrição Completa</h2>
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                         {meeting.transcript && Array.isArray(meeting.transcript) ? (
                             meeting.transcript.map((msg, index) => (
-                                <div key={index} className="bg-gray-100/70 p-4 rounded-xl">
+                                <div key={index} className="bg-[#252836] p-4 rounded-xl">
                                     <div className="flex justify-between items-baseline mb-1">
-                                        <span className="font-semibold text-gray-900 text-sm">{msg.speaker_name || `Participante ${msg.speaker_id}`}</span>
+                                        <span className="font-semibold text-gray-200 text-sm">{msg.speaker_name || `Participante ${msg.speaker_id}`}</span>
                                         <span className="text-xs text-gray-500">
                                             {msg.start_time ? new Date(msg.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                                         </span>
                                     </div>
-                                    <p className="text-gray-700 text-sm leading-relaxed">{msg.text}</p>
+                                    <p className="text-gray-400 text-sm leading-relaxed">{msg.text}</p>
                                 </div>
                             ))
                         ) : (
-                            <div className="text-center text-gray-500 text-sm py-10">Transcrição não disponível.</div>
+                            <div className="text-center text-gray-600 text-sm py-10">Transcrição não disponível.</div>
                         )}
                     </div>
                 </div>
