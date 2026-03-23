@@ -25,22 +25,18 @@ async function analyzeTranscript(transcriptText, openAiKey) {
   `;
 
     try {
-        const response = await openai.responses.create({
-            model: 'gpt-5-mini',
-            instructions: systemPrompt,
-            input: `Analise a transcrição abaixo e retorne o resultado em formato json.\n\nAqui está a transcrição completa:\n\n${transcriptText}`,
-            text: {
-                format: {
-                    type: 'json_object'
-                }
-            },
-            reasoning: {
-                effort: 'low'
-            },
-            store: false
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Analise a transcrição abaixo e retorne o resultado em formato json.\n\nAqui está a transcrição completa:\n\n${transcriptText}` }
+            ],
+            response_format: { type: 'json_object' }
         });
 
-        const parsedData = JSON.parse(response.output_text);
+        const outputText = response.choices[0].message.content;
+        const parsedData = JSON.parse(outputText);
+        console.log("OpenAI retornou:", JSON.stringify(parsedData, null, 2));
         return parsedData;
 
     } catch (error) {

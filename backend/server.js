@@ -117,6 +117,11 @@ async function processMeeting(firefliesId, userId, openAiKey, firefliesApiKey) {
   // A. Buscar transcrição e metadados do Fireflies
   const transcriptData = await fetchMeetingTranscript(firefliesId, firefliesApiKey);
   if (!transcriptData) throw new Error("Transcrição não encontrada.");
+  
+  // Validação: a transcrição já tem texto?
+  if (!transcriptData.sentences || transcriptData.sentences.length === 0 || !transcriptData.text.trim()) {
+      throw new Error("O Fireflies retornou a reunião, mas a transcrição (áudio convertido em texto) ainda está vazia. Ela pode estar processando. Aguarde alguns minutos e tente novamente.");
+  }
 
   // B. Salvar metadados iniciais com status "processing"
   const { data: meetingRecordId, error: insertError } = await supabase
