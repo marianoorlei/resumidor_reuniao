@@ -169,6 +169,7 @@ export default function Dashboard() {
     }
 
     async function handleImportMeeting(meetingId) {
+        console.log('Clicado para importar meeting:', meetingId);
         setManualId(meetingId);
         setShowFirefliesModal(false);
         
@@ -351,7 +352,7 @@ export default function Dashboard() {
                             <div className="absolute inset-0 bg-[#0f1117] opacity-80 backdrop-blur-sm"></div>
                         </div>
 
-                        <div className="inline-block align-bottom bg-[#1e2130] rounded-xl border border-gray-700/50 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+                        <div className="relative z-10 inline-block align-bottom bg-[#1e2130] rounded-xl border border-gray-700/50 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
                             <div className="bg-[#141620] px-4 py-4 sm:px-6 border-b border-gray-700/50 flex justify-between items-center">
                                 <h3 className="text-lg leading-6 font-bold text-gray-100 flex items-center gap-2">
                                     <DownloadCloud className="w-5 h-5 text-blue-400" />
