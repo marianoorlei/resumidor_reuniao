@@ -152,7 +152,7 @@ async function processMeeting(firefliesId, userId, openAiKey, firefliesApiKey) {
     const analysis = await analyzeTranscript(transcriptData.text, openAiKey);
 
     // D. Atualizar com resultado completo
-    await supabase.rpc('process_webhook_meeting', {
+    const { error: finalUpdateError } = await supabase.rpc('process_webhook_meeting', {
       p_user_id: userId,
       p_fireflies_id: firefliesId,
       p_title: analysis.titulo || transcriptData.title || 'Reunião Importada',
@@ -162,14 +162,18 @@ async function processMeeting(firefliesId, userId, openAiKey, firefliesApiKey) {
       p_objective: analysis.objetivo,
       p_executive_summary: analysis.resumo_executivo,
       p_decisions: analysis.decisoes,
-      p_action_items: analysis.itens_acao,
-      p_transcript: transcriptData.sentences,
+      p_action_items: analysis.itens_acao ? { data: analysis.itens_acao } : null,
+      p_transcript: transcriptData.sentences ? { data: transcriptData.sentences } : null,
       p_status: 'completed',
       p_productivity_score: analysis.aproveitamento_nota,
       p_productivity_reason: analysis.aproveitamento_motivo
     });
 
-    console.log(`Reunião ${firefliesId} processada com sucesso!`);
+    if (finalUpdateError) {
+      throw new Error(`Erro ao salvar análise final no banco de dados: ${JSON.stringify(finalUpdateError)}`);
+    }
+
+    console.log(`Reunião ${firefliesId} processada com sucesso e salva no banco!`);
   } catch (error) {
     console.error(`Falha ao processar reunião ${firefliesId}:`, error);
     if (meetingRecordId) {
@@ -250,7 +254,7 @@ app.post('/api/meetings/:meetingId/reprocess', async (req, res) => {
       p_executive_summary: null,
       p_decisions: null,
       p_action_items: null,
-      p_transcript: meetingData.transcript,
+      p_transcript: meetingData.transcript ? { data: meetingData.transcript } : null,
       p_status: 'processing',
       p_productivity_score: null,
       p_productivity_reason: null

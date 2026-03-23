@@ -186,7 +186,7 @@ BEGIN
   VALUES (
     p_user_id, p_fireflies_id, p_title, p_date, p_duration,
     p_meeting_type, p_objective, p_executive_summary, p_decisions,
-    p_action_items, p_transcript, p_status,
+    COALESCE(p_action_items->'data', p_action_items), COALESCE(p_transcript->'data', p_transcript), p_status,
     p_productivity_score, p_productivity_reason
   )
   ON CONFLICT (fireflies_id) DO UPDATE SET
@@ -197,8 +197,8 @@ BEGIN
     objective = EXCLUDED.objective,
     executive_summary = EXCLUDED.executive_summary,
     decisions = EXCLUDED.decisions,
-    action_items = EXCLUDED.action_items,
-    transcript = EXCLUDED.transcript,
+    action_items = COALESCE(EXCLUDED.action_items->'data', EXCLUDED.action_items),
+    transcript = COALESCE(EXCLUDED.transcript->'data', EXCLUDED.transcript),
     status = EXCLUDED.status,
     productivity_score = EXCLUDED.productivity_score,
     productivity_reason = EXCLUDED.productivity_reason
