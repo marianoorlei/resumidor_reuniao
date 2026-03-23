@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2, Trash2, RefreshCw, X, Pencil, Check } from 'lucide-react';
+import { Search, Calendar as CalendarIcon, ChevronDown, Clock, Send, Loader2, Trash2, RefreshCw, X, Pencil, Check, DownloadCloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -20,6 +20,12 @@ export default function Dashboard() {
     const [reprocessing, setReprocessing] = useState(null);
     const [editingTitle, setEditingTitle] = useState(null);
     const [editTitleValue, setEditTitleValue] = useState('');
+    
+    // Novos estados para importação do Fireflies
+    const [showFirefliesModal, setShowFirefliesModal] = useState(false);
+    const [firefliesMeetings, setFirefliesMeetings] = useState([]);
+    const [loadingFireflies, setLoadingFireflies] = useState(false);
+    
     const navigate = useNavigate();
 
     // Filtros
@@ -116,6 +122,81 @@ export default function Dashboard() {
 
             if (response.ok) {
                 setProcessMessage({ type: 'success', text: 'Reunião enviada para processamento! Aguarde alguns segundos e atualize a página.' });
+                setManualId('');
+                setTimeout(() => fetchMeetings(), 8000);
+            } else {
+                setProcessMessage({ type: 'error', text: data.error || 'Erro ao processar reunião.' });
+            }
+        } catch (err) {
+            setProcessMessage({ type: 'error', text: 'Erro de conexão com o backend: ' + err.message });
+        }
+
+        setProcessing(false);
+    }
+
+    async function loadFirefliesMeetings() {
+        setLoadingFireflies(true);
+        setShowFirefliesModal(true);
+        try {
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('fireflies_webhook_secret')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError || !profile?.fireflies_webhook_secret) {
+                setToast({ message: 'Webhook secret não encontrado. Verifique seu perfil.', type: 'error' });
+                setShowFirefliesModal(false);
+                return;
+            }
+
+            const response = await fetch(`${backendUrl}/api/fireflies/transcripts/${profile.fireflies_webhook_secret}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Ordenar por data mais recente
+                const sorted = (data.transcripts || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+                setFirefliesMeetings(sorted);
+            } else {
+                setToast({ message: data.error || 'Erro ao carregar reuniões do Fireflies.', type: 'error' });
+                setShowFirefliesModal(false);
+            }
+        } catch (err) {
+            setToast({ message: 'Erro de conexão: ' + err.message, type: 'error' });
+            setShowFirefliesModal(false);
+        }
+        setLoadingFireflies(false);
+    }
+
+    async function handleImportMeeting(meetingId) {
+        setManualId(meetingId);
+        setShowFirefliesModal(false);
+        
+        // Simular o envio do form para aproveitar a lógica existente
+        const e = { preventDefault: () => {} };
+        
+        setProcessing(true);
+        setProcessMessage(null);
+
+        try {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('fireflies_webhook_secret')
+                .eq('id', user.id)
+                .single();
+
+            const webhookUrl = `${backendUrl}/api/webhooks/fireflies/${profile.fireflies_webhook_secret}`;
+
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ meetingId }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setProcessMessage({ type: 'success', text: 'Reunião importada! Aguarde enquanto a IA analisa o conteúdo.' });
                 setManualId('');
                 setTimeout(() => fetchMeetings(), 8000);
             } else {
@@ -262,6 +343,97 @@ export default function Dashboard() {
                 />
             )}
 
+            {/* Modal de Reuniões do Fireflies */}
+            {showFirefliesModal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+                        <div className="fixed inset-0 transition-opacity" onClick={() => setShowFirefliesModal(false)}>
+                            <div className="absolute inset-0 bg-[#0f1117] opacity-80 backdrop-blur-sm"></div>
+                        </div>
+
+                        <div className="inline-block align-bottom bg-[#1e2130] rounded-xl border border-gray-700/50 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+                            <div className="bg-[#141620] px-4 py-4 sm:px-6 border-b border-gray-700/50 flex justify-between items-center">
+                                <h3 className="text-lg leading-6 font-bold text-gray-100 flex items-center gap-2">
+                                    <DownloadCloud className="w-5 h-5 text-blue-400" />
+                                    Importar do Fireflies.ai
+                                </h3>
+                                <button
+                                    onClick={() => setShowFirefliesModal(false)}
+                                    className="text-gray-400 hover:text-gray-200 transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="px-4 py-5 sm:p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                {loadingFireflies ? (
+                                    <div className="flex flex-col items-center justify-center py-12">
+                                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+                                        <p className="text-gray-400 text-sm">Buscando suas reuniões recentes no Fireflies...</p>
+                                    </div>
+                                ) : firefliesMeetings.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-400">Nenhuma reunião encontrada na sua conta do Fireflies.</p>
+                                        <p className="text-gray-500 text-sm mt-2">Verifique se sua API Key está correta nas Configurações.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {firefliesMeetings.map((meeting) => (
+                                            <div 
+                                                key={meeting.id} 
+                                                className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                                                    meeting.already_imported 
+                                                        ? 'bg-[#1a1d27]/50 border-gray-700/30 opacity-70' 
+                                                        : 'bg-[#1a1d27] border-gray-700/50 hover:border-blue-500/50'
+                                                }`}
+                                            >
+                                                <div className="flex-1 min-w-0 pr-4">
+                                                    <h4 className="text-md font-semibold text-gray-200 truncate" title={meeting.title}>
+                                                        {meeting.title || 'Reunião sem título'}
+                                                    </h4>
+                                                    <div className="flex items-center mt-1 text-sm text-gray-400 gap-3">
+                                                        <span className="flex items-center gap-1">
+                                                            <CalendarIcon className="w-3.5 h-3.5" />
+                                                            {format(new Date(meeting.date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="w-3.5 h-3.5" />
+                                                            {meeting.duration} min
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button
+                                                    onClick={() => handleImportMeeting(meeting.id)}
+                                                    disabled={meeting.already_imported || processing}
+                                                    className={`px-4 py-2 text-sm font-medium rounded-lg shrink-0 transition-colors ${
+                                                        meeting.already_imported 
+                                                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed hidden sm:block' 
+                                                            : 'bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border border-blue-500/20'
+                                                    }`}
+                                                >
+                                                    {meeting.already_imported ? 'Já Importado' : 'Importar'}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="bg-[#141620] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-700/50">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowFirefliesModal(false)}
+                                    className="w-full inline-flex justify-center rounded-md border border-gray-600 shadow-sm px-4 py-2 bg-[#252836] text-base font-medium text-gray-200 hover:bg-gray-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-colors"
+                                >
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
                 <h1 className="text-3xl font-extrabold text-gray-100 mb-4 md:mb-0">Painel de Reuniões</h1>
@@ -379,32 +551,55 @@ export default function Dashboard() {
             )}
 
             {/* Processar reunião manualmente */}
-            <div className="bg-[#1a1d27] border border-gray-700/50 rounded-lg p-5 shadow-sm mb-6">
-                <h2 className="text-sm font-semibold text-gray-300 mb-3">Processar reunião por ID do Fireflies</h2>
-                <form onSubmit={handleManualProcess} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <input
-                        type="text"
-                        value={manualId}
-                        onChange={(e) => setManualId(e.target.value)}
-                        placeholder="Cole o Meeting ID do Fireflies aqui..."
-                        className="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-mono bg-[#252836] text-gray-100 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
-                        disabled={processing}
-                    />
+            <div className="bg-[#1a1d27] border border-gray-700/50 rounded-lg p-5 shadow-sm mb-6 flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                <div className="flex-1">
+                    <h2 className="text-sm font-semibold text-gray-300 mb-1 flex items-center gap-2">
+                        <DownloadCloud className="w-4 h-4 text-blue-400" />
+                        Importar Reuniões Recentes
+                    </h2>
+                    <p className="text-xs text-gray-500 mb-3">Busque suas reuniões direto da sua conta do Fireflies.ai</p>
+                    
                     <button
-                        type="submit"
-                        disabled={processing || !manualId.trim()}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                        onClick={loadFirefliesMeetings}
+                        disabled={loadingFireflies || processing}
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50 shadow-lg shadow-blue-500/20"
                     >
-                        {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                        {processing ? 'Processando...' : 'Processar'}
+                        {loadingFireflies ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                        {loadingFireflies ? 'Buscando...' : 'Buscar Minhas Reuniões'}
                     </button>
-                </form>
-                {processMessage && (
-                    <p className={`mt-3 text-sm ${processMessage.type === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                        {processMessage.text}
-                    </p>
-                )}
+                </div>
+                
+                <div className="hidden md:block w-px h-20 bg-gray-700/50 mx-2"></div>
+
+                <div className="flex-1">
+                    <h2 className="text-sm font-semibold text-gray-300 mb-1">Importação Automática (Webhook)</h2>
+                    <p className="text-xs text-gray-500 mb-3">Seu webhook já processará novas reuniões automaticamente.</p>
+                    <form onSubmit={handleManualProcess} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <input
+                            type="text"
+                            value={manualId}
+                            onChange={(e) => setManualId(e.target.value)}
+                            placeholder="...ou cole o ID caso falhe"
+                            className="flex-1 px-3 py-2 border border-gray-600 rounded-lg text-xs font-mono bg-[#252836] text-gray-100 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+                            disabled={processing}
+                        />
+                        <button
+                            type="submit"
+                            disabled={processing || !manualId.trim()}
+                            className="flex items-center justify-center gap-1 px-3 py-2 bg-[#252836] border border-gray-600 text-gray-200 text-xs font-medium rounded-lg hover:bg-gray-700 transition disabled:opacity-50"
+                        >
+                            {processing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                            Processar
+                        </button>
+                    </form>
+                </div>
             </div>
+            {processMessage && (
+                <div className={`mb-6 p-3 rounded-lg border text-sm flex items-center gap-2 ${processMessage.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                    {processMessage.type === 'success' ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                    {processMessage.text}
+                </div>
+            )}
 
             {/* Loading state */}
             {loading ? (

@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
-const { fetchMeetingTranscript } = require('./services/fireflies');
+const { fetchMeetingTranscript, listTranscripts } = require('./services/fireflies');
 const { analyzeTranscript } = require('./services/openai');
 
 const app = express();
@@ -20,6 +20,49 @@ const supabase = createClient(supabaseUrl || 'https://mock.supabase.co', supabas
 
 app.get('/health', (req, res) => {
   res.json({ status: 'OK' });
+});
+
+// Listar reuniões recentes do Fireflies para o usuário selecionar
+app.get('/api/fireflies/transcripts/:user_secret', async (req, res) => {
+  const { user_secret } = req.params;
+
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .rpc('get_profile_by_webhook_secret', { p_secret: user_secret });
+
+    if (profileError || !profile || profile.length === 0) {
+      return res.status(401).json({ error: 'Secret inválido.' });
+    }
+
+    const { fireflies_api_key } = profile[0];
+
+    if (!fireflies_api_key) {
+      return res.status(400).json({ error: 'Fireflies API Key não configurada.' });
+    }
+
+    const transcripts = await listTranscripts(fireflies_api_key, 20);
+
+    // Buscar IDs de reuniões já importadas para marcar no frontend
+    const firefliesIds = transcripts.map(t => t.id);
+    const { data: existingMeetings } = await supabase
+      .rpc('get_existing_fireflies_ids', { p_ids: firefliesIds });
+
+    const existingIds = new Set((existingMeetings || []).map(m => m.fireflies_id));
+
+    const result = transcripts.map(t => ({
+      id: t.id,
+      title: t.title,
+      date: t.date,
+      duration: t.duration,
+      organizer_email: t.organizer_email,
+      already_imported: existingIds.has(t.id)
+    }));
+
+    res.json({ transcripts: result });
+  } catch (error) {
+    console.error('Erro ao listar transcrições:', error);
+    res.status(500).json({ error: 'Erro ao buscar reuniões do Fireflies.' });
+  }
 });
 
 app.post('/api/webhooks/fireflies/:user_secret', async (req, res) => {

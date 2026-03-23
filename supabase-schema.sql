@@ -242,6 +242,29 @@ BEGIN
 END;
 $$;
 
+-- 9. RPC: get_existing_fireflies_ids
+-- ============================================================
+-- Usada pelo backend para verificar quais reuniões de uma lista
+-- de IDs do Fireflies já foram importadas.
+
+DROP FUNCTION IF EXISTS public.get_existing_fireflies_ids;
+
+CREATE OR REPLACE FUNCTION public.get_existing_fireflies_ids(p_ids TEXT[])
+RETURNS TABLE(
+  fireflies_id TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT m.fireflies_id
+  FROM public.meetings m
+  WHERE m.fireflies_id = ANY(p_ids);
+END;
+$$;
+
 -- ============================================================
 -- FIM DO SCHEMA
 -- ============================================================

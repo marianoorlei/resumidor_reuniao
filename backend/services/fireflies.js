@@ -63,6 +63,51 @@ async function fetchMeetingTranscript(firefliesId, apiKey) {
     }
 }
 
+async function listTranscripts(apiKey, limit = 20) {
+    if (!apiKey) {
+        throw new Error("Fireflies API Key não fornecida.");
+    }
+
+    const query = `
+    query listTranscripts($limit: Int) {
+      transcripts(limit: $limit) {
+        id
+        title
+        date
+        duration
+        organizer_email
+      }
+    }
+    `;
+
+    try {
+        const response = await axios.post(
+            'https://api.fireflies.ai/graphql',
+            {
+                query,
+                variables: { limit }
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const transcripts = response.data?.data?.transcripts;
+        if (!transcripts) {
+            throw new Error(`Nenhuma transcrição encontrada. Resposta: ${JSON.stringify(response.data)}`);
+        }
+
+        return transcripts;
+    } catch (error) {
+        console.error('Erro ao listar transcrições do Fireflies:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
 module.exports = {
-    fetchMeetingTranscript
+    fetchMeetingTranscript,
+    listTranscripts
 };
