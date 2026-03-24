@@ -18,7 +18,13 @@ async function analyzeTranscript(transcriptText, openAiKey) {
     "objetivo": "string", // O objetivo principal desta reunião
     "resumo_executivo": "string", // Um resumo conciso da reunião (2 a 3 parágrafos)
     "decisoes": "string", // Tópicos e decisões importantes tomadas (formato Markdown bullet points)
-    "itens_acao": ["string"], // Array de strings. Cada item é uma tarefa definida para alguém fazer.
+    "itens_acao": [
+      {
+        "prioridade": "string", // Valores exatos permitidos: "24h", "48h", "semana", "sem urgência"
+        "titulo": "string", // O título curto da tarefa a ser feita
+        "descricao": "string" // Uma descrição mais detalhada de quem deve fazer e como (1 a 2 frases)
+      }
+    ], // Array de objetos. Cada item é uma ação identificada na reunião. Se não houver, retorne array vazio [].
     "aproveitamento_nota": number, // Nota de 0 a 10 avaliando o quão proveitosa foi a reunião
     "aproveitamento_motivo": "string" // Justificativa da nota, explicando por que a reunião foi ou não produtiva
   }
