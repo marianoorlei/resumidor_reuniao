@@ -238,7 +238,8 @@ export default function MeetingDetails() {
             y += 6;
         }
 
-        if (meeting.action_items && Array.isArray(meeting.action_items) && meeting.action_items.length > 0) {
+        const actionItemsList = Array.isArray(meeting.action_items) ? meeting.action_items : meeting.action_items?.data;
+        if (actionItemsList && Array.isArray(actionItemsList) && actionItemsList.length > 0) {
             checkPageBreak(30);
             doc.setFillColor(...blue);
             doc.rect(margin, y, 3, 8, 'F');
@@ -248,7 +249,7 @@ export default function MeetingDetails() {
             doc.text('Itens de Acao', margin + 6, y + 6);
             y += 14;
 
-            meeting.action_items.forEach((item, idx) => {
+            actionItemsList.forEach((item, idx) => {
                 checkPageBreak(10);
                 doc.setDrawColor(...gray);
                 doc.setLineWidth(0.3);
@@ -397,13 +398,17 @@ export default function MeetingDetails() {
                     <div className="bg-[#1a1d27] rounded-xl shadow-sm border border-gray-700/50 p-5">
                         <h3 className="text-sm font-bold text-gray-200 mb-3">Itens de Ação</h3>
                         <ul className="space-y-3">
-                            {meeting.action_items && Array.isArray(meeting.action_items) ?
-                                meeting.action_items.map((item, idx) => (
+                            {(() => {
+                                const items = Array.isArray(meeting.action_items) ? meeting.action_items : meeting.action_items?.data;
+                                return items && Array.isArray(items) && items.length > 0 ? (
+                                    items.map((item, idx) => (
                                     <li key={idx} className="flex items-start space-x-3">
                                         <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-600 bg-[#252836] text-blue-500 focus:ring-blue-500 focus:ring-offset-[#1a1d27]" />
                                         <span className="text-gray-400 text-sm leading-relaxed leading-snug">{item}</span>
                                     </li>
-                                )) : <p className="text-gray-600 text-sm">Não disponível</p>}
+                                ))
+                                ) : <p className="text-gray-600 text-sm">Não disponível</p>;
+                            })}
                         </ul>
                     </div>
                 </div>
@@ -414,8 +419,10 @@ export default function MeetingDetails() {
                         <h2 className="text-xl font-bold text-gray-100">Transcrição Completa</h2>
                     </div>
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                        {meeting.transcript && Array.isArray(meeting.transcript) ? (
-                            meeting.transcript.map((msg, index) => (
+                        {(() => {
+                            const tz = Array.isArray(meeting.transcript) ? meeting.transcript : meeting.transcript?.data;
+                            return tz && Array.isArray(tz) && tz.length > 0 ? (
+                                tz.map((msg, index) => (
                                 <div key={index} className="bg-[#252836] p-4 rounded-xl">
                                     <div className="flex justify-between items-baseline mb-1">
                                         <span className="font-semibold text-gray-200 text-sm">{msg.speaker_name || `Participante ${msg.speaker_id}`}</span>
@@ -426,9 +433,10 @@ export default function MeetingDetails() {
                                     <p className="text-gray-400 text-sm leading-relaxed">{msg.text}</p>
                                 </div>
                             ))
-                        ) : (
-                            <div className="text-center text-gray-600 text-sm py-10">Transcrição não disponível.</div>
-                        )}
+                            ) : (
+                                <div className="text-center text-gray-600 text-sm py-10">Transcrição não disponível.</div>
+                            );
+                        })}
                     </div>
                 </div>
 
