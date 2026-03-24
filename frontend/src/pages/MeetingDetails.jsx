@@ -327,7 +327,10 @@ export default function MeetingDetails() {
                     <span>Voltar</span>
                 </button>
 
-                <h1 className="text-lg lg:text-xl font-semibold order-last w-full text-center lg:order-none lg:w-auto lg:absolute lg:left-1/2 lg:-translate-x-1/2">
+                <h1 
+                    className="text-lg lg:text-xl font-semibold order-last mt-3 w-full text-center lg:mt-0 lg:order-none lg:w-auto lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:max-w-[45vw] lg:truncate px-2"
+                    title={meeting.title || 'Detalhes da Reunião'}
+                >
                     {meeting.title || 'Detalhes da Reunião'}
                 </h1>
 
