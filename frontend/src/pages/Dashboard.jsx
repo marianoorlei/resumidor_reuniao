@@ -712,7 +712,7 @@ export default function Dashboard() {
 
             {/* Footer */}
             <footer className="text-center text-xs text-gray-600 py-6 mt-8">
-                Desenvolvido por Leonardo Freire
+                Desenvolvido por D3tech
             </footer>
         </div>
     );
