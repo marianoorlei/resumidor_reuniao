@@ -73,7 +73,7 @@ export default function MeetingDetails() {
             lines.push('');
         }
 
-        lines.push('_Gerado por AI Meet_');
+        lines.push('_Gerado por D3tech IA Meet_');
         return lines.join('\n');
     }
 
@@ -250,19 +250,41 @@ export default function MeetingDetails() {
             y += 14;
 
             actionItemsList.forEach((item, idx) => {
-                checkPageBreak(10);
+                checkPageBreak(12);
                 doc.setDrawColor(...gray);
                 doc.setLineWidth(0.3);
                 doc.rect(margin + 6, y - 3, 4, 4);
                 doc.setTextColor(55, 65, 81);
                 doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                const lines = doc.splitTextToSize(item, contentWidth - 18);
-                lines.forEach((line, i) => {
+                doc.setFont('helvetica', 'bold');
+                
+                let titleText = '';
+                let descText = '';
+                
+                if (typeof item === 'string') {
+                    titleText = item;
+                } else {
+                    titleText = `[${item.prioridade || 'Prazo não definido'}] ${item.titulo}`;
+                    descText = item.descricao || '';
+                }
+
+                const titleLines = doc.splitTextToSize(titleText, contentWidth - 18);
+                titleLines.forEach((line) => {
                     checkPageBreak(6);
                     doc.text(line, margin + 13, y);
                     y += 5;
                 });
+                
+                if (descText) {
+                    doc.setFont('helvetica', 'normal');
+                    const descLines = doc.splitTextToSize(descText, contentWidth - 18);
+                    descLines.forEach((line) => {
+                        checkPageBreak(6);
+                        doc.text(line, margin + 13, y);
+                        y += 5;
+                    });
+                }
+                
                 y += 3;
             });
             y += 4;
@@ -277,7 +299,7 @@ export default function MeetingDetails() {
             doc.setTextColor(...gray);
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-            doc.text('Gerado por AI Meet', margin, pageH - 5);
+            doc.text('Gerado por D3tech IA Meet', margin, pageH - 5);
             doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin - 20, pageH - 5);
         }
 
@@ -401,12 +423,48 @@ export default function MeetingDetails() {
                             {(() => {
                                 const items = Array.isArray(meeting.action_items) ? meeting.action_items : meeting.action_items?.data;
                                 return items && Array.isArray(items) && items.length > 0 ? (
-                                    items.map((item, idx) => (
-                                    <li key={idx} className="flex items-start space-x-3">
-                                        <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-600 bg-[#252836] text-blue-500 focus:ring-blue-500 focus:ring-offset-[#1a1d27]" />
-                                        <span className="text-gray-400 text-sm leading-relaxed leading-snug">{item}</span>
-                                    </li>
-                                ))
+                                    items.map((item, idx) => {
+                                        // Retrocompatibilidade para quando as tarefas eram apenas strings
+                                        if (typeof item === 'string') {
+                                            return (
+                                                <li key={idx} className="flex items-start space-x-3">
+                                                    <input type="checkbox" className="mt-1 w-4 h-4 rounded border-gray-600 bg-[#252836] text-blue-500 focus:ring-blue-500 focus:ring-offset-[#1a1d27]" />
+                                                    <span className="text-gray-400 text-sm leading-relaxed leading-snug">{item}</span>
+                                                </li>
+                                            );
+                                        }
+
+                                        // Novo formato rico
+                                        let priorityColor = 'bg-gray-500/20 text-gray-400';
+                                        let dotColor = 'bg-gray-400';
+                                        const prio = (item.prioridade || '').toLowerCase();
+                                        
+                                        if (prio.includes('24h') || prio.includes('urgent')) {
+                                            priorityColor = 'bg-red-500/15 text-red-400';
+                                            dotColor = 'bg-red-500';
+                                        } else if (prio.includes('48h')) {
+                                            priorityColor = 'bg-orange-500/15 text-orange-400';
+                                            dotColor = 'bg-orange-500';
+                                        } else if (prio.includes('semana')) {
+                                            priorityColor = 'bg-yellow-500/15 text-yellow-400';
+                                            dotColor = 'bg-yellow-500';
+                                        }
+
+                                        return (
+                                            <li key={idx} className="flex items-start gap-4 p-3 bg-[#252836] rounded-lg border border-gray-700/50">
+                                                <div className="pt-0.5 shrink-0">
+                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${priorityColor}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
+                                                        {item.prioridade || 'sem prazo'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-bold text-gray-200 mb-1">{item.titulo}</p>
+                                                    {item.descricao && <p className="text-xs text-gray-400 leading-relaxed">{item.descricao}</p>}
+                                                </div>
+                                            </li>
+                                        );
+                                    })
                                 ) : <p className="text-gray-600 text-sm">Não disponível</p>;
                             })}
                         </ul>

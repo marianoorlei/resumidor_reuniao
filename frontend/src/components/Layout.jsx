@@ -31,8 +31,8 @@ export default function Layout() {
                     <Menu className="w-6 h-6" />
                 </button>
                 <div className="flex items-center space-x-2 ml-3">
-                    <Brain className="w-7 h-7 text-blue-400" />
-                    <span className="text-lg font-bold text-gray-100">AI Meet</span>
+                    <img src="/d3tech_logo.png" alt="Logo" className="w-7 h-7 rounded-full object-cover" />
+                    <span className="text-lg font-bold text-gray-100">D3tech IA Meet</span>
                 </div>
             </div>
 
@@ -55,8 +55,8 @@ export default function Layout() {
             >
                 <div className="flex items-center justify-between px-6 py-6">
                     <div className="flex items-center space-x-2">
-                        <Brain className="w-8 h-8 text-blue-400" />
-                        <span className="text-xl font-bold text-gray-100">AI Meet</span>
+                        <img src="/d3tech_logo.png" alt="Logo" className="w-8 h-8 rounded-full object-cover" />
+                        <span className="text-xl font-bold text-gray-100">D3tech IA Meet</span>
                     </div>
                     <button
                         onClick={closeSidebar}

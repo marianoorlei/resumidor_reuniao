@@ -1,6 +1,6 @@
 {
-  "name": "AI Meet - Resumo de Reuniões",
-  "short_name": "AI Meet",
+  "name": "D3tech IA Meet - Resumo de Reuniões",
+  "short_name": "D3tech IA Meet",
   "description": "Resumo inteligente de reuniões com IA",
   "start_url": "/",
   "display": "standalone",
@@ -33,7 +33,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Tela inicial do AI Meet"
+      "label": "Tela inicial do D3tech IA Meet"
     }
   ]
 }

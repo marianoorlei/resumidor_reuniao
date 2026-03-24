@@ -93,7 +93,7 @@ export default function Login() {
                             {isRegister ? 'Criar conta' : 'Bem-vindo de volta'}
                         </h2>
                         <p className="mt-2 text-sm text-gray-400">
-                            {isRegister ? 'Cadastre-se no AI Meet' : 'Faça login no AI Meet'}
+                            {isRegister ? 'Cadastre-se no D3tech IA Meet' : 'Faça login no D3tech IA Meet'}
                         </p>
                     </div>
 
